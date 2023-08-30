@@ -20,3 +20,7 @@ body{
 .primary__text{
     color: var(--primary);
 }
+
+.normal__text{
+    color: var(--text);
+}

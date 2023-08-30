@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}
+    Messages
+{% endblock title %}
+{% block content %}  
+<button id="sidebarToggle" class="px-4 py-2 bg-gray-800 text-white md:hidden">Toggle Sidebar</button>
+<div id="sidebar" class="fixed -mt-4 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 bg-transparent md:block">
+    <aside id="default-sidebar" class="h-full px-3 py-4 overflow-y-auto bg-transparent">
+        <ul class="space-y-2 font-medium">
+            {% for i in users %}
+            <li>
+                <a href="/messages/{{i.id}}" class="flex items-center p-2 text-gray-900 rounded-lg text-white hover:underline group" style="background-color: var(--primary);">
+                    <span class="ml-3">{{i.username}}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </aside>
+</div>
+ <div class="flex-1 p-4 ml-0 md:ml-64 -mt-16">
+    <div class="p-4 border-2 border-gray-200 rounded-lg dark:border-gray-700">
+        <!-- Chat Component Start -->
+        <div class="flex flex-col space-y-4">
+            <!-- You can loop through the messages and render them here -->
+            <div class="flex space-x-3">
+                <div class="flex flex-col" id="messages">
+                    {% for sender, decrypted_text in decrypted_messages %}
+                    <div class="primary__btn p-3 rounded-r-lg rounded-bl-lg mb-2" style="color: var(--text);">
+                        <strong>{{sender}}</strong>
+                        <p class="text-sm">{{decrypted_text}}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 flex flex-col md:flex-row items-center">
+            <input class="focus:outline-none normal__text block w-full rounded-md border border-gray-200 dark:border-gray-600 bg-transparent px-4 py-3 transition duration-300 focus:ring-2 focus:ring-[#6330bb] mb-2 md:mb-0 md:mr-2" type="text" id="messageInput" placeholder="Message">
+            <button class="inline-block rounded-lg primary__btn px-8 py-3 text-center text-sm font-semibold text-white outline-none md:text-base" id="sendButton">Send</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    var socket = io.connect('http://127.0.0.1:5000');
+
+    socket.on('connect', function () {
+        console.log('connected')
+    })
+
+    var messageInput = document.getElementById('messageInput');
+    var sendButton = document.getElementById('sendButton');
+    var messagesDiv = document.getElementById('messages')
+
+    sendButton.addEventListener('click', function () {
+        var message = messageInput.value;
+        var receiverId = '{{receiver_id}}';
+        socket.emit('message', { message: message, receiver_id: receiverId });
+        messageInput.value = '';
+    });
+
+    socket.on('message', function (data) {
+        var messageContainer = document.createElement('div');
+        messageContainer.classList.add('primary__btn', 'p-3', 'rounded-r-lg', 'rounded-bl-lg', 'mb-2');
+        messageContainer.style.color = "var(--text)"
+
+        var senderElement = document.createElement('strong');
+        senderElement.textContent = data.sender;
+
+        var textElement = document.createElement('p');
+        textElement.classList.add('text-sm');
+        textElement.textContent = data.message;
+
+        messageContainer.appendChild(senderElement);
+        messageContainer.appendChild(textElement);
+
+        messagesDiv.appendChild(messageContainer);
+    });
+
+    var sidebarToggle = document.getElementById('sidebarToggle');
+    var sidebar = document.getElementById('sidebar');
+
+    sidebarToggle.addEventListener('click', function () {
+        sidebar.classList.toggle('-translate-x-0');
+    });
+</script>
+{% endblock content %}

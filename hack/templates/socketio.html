@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Messaging</title>
+</head>
+<body>
+    <h1>Welcome to Real-Time Messaging</h1>
+    {% if current_user.is_authenticated %}
+        <h2>Hello, {{ current_user.username }}!</h2>
+    {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('reg') }}">Register</a>
+    {% endif %}
+
+    {% if current_user.is_authenticated %}
+        <div id="messages">
+            <ul>
+                {% for sender, decrypted_text in messages %}
+                <li>{{ sender }} - {{ decrypted_text }}</li>
+                {% endfor %}
+            </ul>
+            
+        </div>
+        <input type="text" id="messageInput" placeholder="Enter your message">
+        <button id="sendButton">Send</button>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <script>
+            var socket = io.connect('http://127.0.0.1:5000');
+
+            socket.on('connect', function () {
+                console.log('connected')
+            })
+
+            var messageInput = document.getElementById('messageInput');
+            var sendButton = document.getElementById('sendButton');
+            var messagesDiv = document.getElementById('messages').querySelector('ul');
+
+            sendButton.addEventListener('click', function () {
+                var message = messageInput.value;
+                var receiverId = '{{receiver_id}}';
+                socket.emit('message', { message: message, receiver_id: receiverId });
+                messageInput.value = '';
+            });
+
+            socket.on('message', function (data) {
+                console.log(data)
+                var messageElement = document.createElement('p');
+                console.log('YO')
+                messageElement.textContent = data.sender + ': LLMAOOO';
+                messagesDiv.appendChild(messageElement);
+            });
+        </script>
+    {% endif %}
+</body>
+</html>
