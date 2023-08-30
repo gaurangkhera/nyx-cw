@@ -100,6 +100,8 @@ def handle_disconnect():
 def dashboard():
     users = User.query.all()
     users.remove(current_user)
+    if len(users) == 0:
+        return redirect('/')
     return redirect(url_for('msg', receiver_id=users[0].id))
 
 @socketio.on('message')
