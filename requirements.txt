@@ -56,4 +56,5 @@ virtualenv==20.23.0
 Werkzeug==2.2.3
 WTForms==3.0.1
 zipp==3.15.0
-chess
+cryptography
+flask-socketio
